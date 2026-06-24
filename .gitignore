@@ -1,0 +1,11 @@
+.venv/
+downloads/
+models/
+output/
+frames/
+input/
+
+__pycache__/
+*.pyc
+
+.env

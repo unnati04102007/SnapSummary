@@ -1,0 +1,11 @@
+flask
+flask-cors
+python-dotenv
+yt-dlp
+groq
+tavily-python
+edge-tts
+playwright
+moviepy
+requests
+opencv-python

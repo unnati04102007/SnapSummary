@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SnapSummary</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── DESIGN SYSTEM & RESET ────────────────────────── */
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+  }
+
+  body {
+    width: 320px;
+    font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+    color: #E2E8F0;
+    background: linear-gradient(135deg, #0A0F1E, #0D1F3C, #0A1628);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    padding-bottom: 8px;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ── SCROLLBARS ──────────────────────────────────── */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.3);
+  }
+
+  /* ── SCREENS ─────────────────────────────────────── */
+  .screen { 
+    display: none; 
+    padding-bottom: 8px;
+  }
+  .screen.active { 
+    display: block; 
+    animation: fadeSlideIn 0.25s ease forwards;
+  }
+
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── HEADER ──────────────────────────────────────── */
+  .header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    background: rgba(10, 15, 30, 0.4);
+    backdrop-filter: blur(8px);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #00D4FF, #7C3AED);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-icon {
+    width: 26px; 
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+  }
+  .logo-icon svg { 
+    width: 14px; 
+    height: 14px; 
+    fill: #00D4FF; 
+    filter: drop-shadow(0 0 2px #00D4FF);
+  }
+  .logo-name {
+    font-size: 15px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #00D4FF, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.5px;
+  }
+  .header-icons { 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+  }
+  .icon-btn {
+    background: none; 
+    border: none;
+    cursor: pointer; 
+    padding: 6px;
+    color: rgba(255, 255, 255, 0.6); 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+  .icon-btn:hover { 
+    color: #00D4FF; 
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+  }
+  .back-btn {
+    background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer; 
+    color: rgba(255, 255, 255, 0.75);
+    display: flex; 
+    align-items: center;
+    gap: 5px; 
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  .back-btn:hover { 
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ── SECTION CARDS ──────────────────────────────── */
+  .card-container {
+    margin: 12px 14px 0;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  /* ── URL BAR ────────────────────────────────────── */
+  .url-bar {
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+  .url-bar .yt-icon { 
+    color: #EF4444; 
+    font-size: 16px; 
+    flex-shrink: 0; 
+  }
+  .url-text {
+    font-size: 11.5px; 
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .url-check { 
+    color: #22C55E; 
+    font-size: 14px; 
+    filter: drop-shadow(0 0 3px rgba(34,197,94,0.5));
+  }
+  
+  /* URL glow overrides */
+  .url-card:not(.no-yt) {
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.1), inset 0 0 4px rgba(34, 197, 94, 0.05);
+  }
+  .url-card.no-yt { 
+    border-color: rgba(239, 68, 68, 0.3); 
+    background: rgba(239, 68, 68, 0.02);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.1), inset 0 0 4px rgba(239, 68, 68, 0.05);
+  }
+  .url-card.no-yt .url-text { 
+    color: #EF4444; 
+  }
+  .url-card.no-yt .url-check { 
+    display: none; 
+  }
+
+  /* ── SECTION LABELS ──────────────────────────────── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  /* ── TOGGLE BUTTONS ──────────────────────────────── */
+  .toggle-group {
+    display: flex; 
+    gap: 6px;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Outfit', sans-serif;
+  }
+  .toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .toggle-btn.active {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: #00D4FF;
+    color: #00D4FF;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.05);
+  }
+  .toggle-btn .sub {
+    font-size: 9.5px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 2px;
+    transition: color 0.2s;
+  }
+  .toggle-btn.active .sub { 
+    color: rgba(0, 212, 255, 0.7); 
+  }
+
+  /* ── MAIN CTA BUTTON ─────────────────────────────── */
+  .main-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #00D4FF, #7C3AED);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    transition: all 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+  }
+  .main-btn:hover:not(:disabled) { 
+    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(0, 212, 255, 0.45);
+  }
+  .main-btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .main-btn:disabled { 
+    background: rgba(255, 255, 255, 0.08); 
+    color: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    cursor: not-allowed; 
+  }
+  .main-btn svg { 
+    width: 14px; 
+    height: 14px; 
+    fill: currentColor; 
+  }
+
+  /* ── DIVIDER ─────────────────────────────────────── */
+  .divider { 
+    border: none; 
+    border-top: 1px solid rgba(255, 255, 255, 0.08); 
+    margin: 12px 14px 0; 
+  }
+
+  /* ── SECONDARY OVERVIEW BUTTONS ──────────────────── */
+  .secondary-btns { 
+    padding: 10px 14px 6px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+  }
+  .sec-btn {
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 3px solid #00D4FF;
+    border-radius: 10px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+  }
+  .sec-btn:hover:not(:disabled) { 
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  }
+  .sec-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .sec-btn svg { 
+    width: 15px; 
+    height: 15px; 
+    color: #00D4FF; 
+    flex-shrink: 0; 
+  }
+
+  /* ── LOADING SCREEN ──────────────────────────────── */
+  .loading-screen {
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .spinner {
+    width: 38px; 
+    height: 38px;
+    border: 3px solid rgba(0, 212, 255, 0.1);
+    border-top-color: #00D4FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+  }
+  @keyframes spin { 
+    to { transform: rotate(360deg); } 
+  }
+  .loading-title { 
+    font-size: 14.5px; 
+    font-weight: 600; 
+    color: #fff; 
+    margin-bottom: 6px; 
+  }
+  .loading-sub { 
+    font-size: 11.5px; 
+    color: rgba(255, 255, 255, 0.5); 
+    line-height: 1.4; 
+  }
+  .loading-steps { 
+    margin-top: 20px; 
+    text-align: left; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .step-item {
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    font-size: 11px; 
+    color: rgba(255, 255, 255, 0.4);
+    animation: stepFadeIn 0.35s ease forwards;
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  #step-1 { animation-delay: 0.05s; }
+  #step-2 { animation-delay: 0.15s; }
+  #step-3 { animation-delay: 0.25s; }
+  #step-4 { animation-delay: 0.35s; }
+
+  @keyframes stepFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-item.done { 
+    color: #22C55E; 
+  }
+  .step-item.active { 
+    color: #00D4FF; 
+    font-weight: 600; 
+  }
+  .step-dot {
+    width: 8px; 
+    height: 8px; 
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15); 
+    flex-shrink: 0;
+  }
+  .step-item.done .step-dot { 
+    background: #22C55E; 
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+  }
+  .step-item.active .step-dot { 
+    background: #00D4FF; 
+    box-shadow: 0 0 10px #00D4FF;
+    animation: pulse 1.2s infinite; 
+  }
+  
+  @keyframes pulse { 
+    0%, 100% { opacity: 0.5; box-shadow: 0 0 2px rgba(0, 212, 255, 0.4); } 
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(0, 212, 255, 0.8); } 
+  }
+
+  /* ── RESULT SCREEN ────────────────────────────────── */
+  .result-meta {
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .result-title {
+    font-size: 13.5px; 
+    font-weight: 600;
+    color: #fff;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .result-tags { 
+    display: flex; 
+    gap: 6px; 
+    margin-top: 6px; 
+  }
+  .tag {
+    font-size: 9.5px;
+    font-weight: 500;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .result-body {
+    padding: 12px 14px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  .result-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  .result-section-title:not(:first-child) { 
+    margin-top: 14px; 
+  }
+
+  /* Frosted summary card with animated gradient left border */
+  .summary-card {
+    position: relative;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.55;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3.5px;
+    background: linear-gradient(180deg, #00D4FF, #7C3AED, #00D4FF);
+    background-size: 100% 200%;
+    animation: borderGradient 3s linear infinite;
+  }
+  
+  @keyframes borderGradient {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  /* Staggered cards for key points */
+  .point-card {
+    position: relative;
+    padding: 9px 11px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    border-left: 3px solid #00D4FF;
+    font-size: 11.5px; 
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.5;
+    margin-bottom: 6px;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: cardFadeIn 0.35s ease forwards;
+  }
+  .point-card:nth-child(1) { animation-delay: 0.05s; }
+  .point-card:nth-child(2) { animation-delay: 0.15s; }
+  .point-card:nth-child(3) { animation-delay: 0.25s; }
+  .point-card:nth-child(4) { animation-delay: 0.35s; }
+  .point-card:nth-child(5) { animation-delay: 0.45s; }
+  .point-card:nth-child(6) { animation-delay: 0.55s; }
+  .point-card:nth-child(7) { animation-delay: 0.65s; }
+  .point-card:nth-child(8) { animation-delay: 0.75s; }
+
+  @keyframes cardFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Highlighted takeaway card with cyan-purple left border */
+  .takeaway-card {
+    position: relative;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    font-size: 12px; 
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.55;
+    overflow: hidden;
+  }
+  .takeaway-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #00D4FF, #7C3AED);
+  }
+
+  /* Audio player section */
+  .audio-container {
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 14px;
+  }
+  .audio-container audio {
+    width: 100%;
+    height: 32px;
+    border-radius: 8px;
+    outline: none;
+    filter: invert(0.9) hue-rotate(180deg); /* Style default chrome player */
+  }
+
+  /* Result Actions */
+  .result-actions {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 14px 6px;
+    display: flex; 
+    gap: 6px;
+  }
+  .result-act-btn {
+    flex: 1;
+    padding: 8px 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 4px;
+    transition: all 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+  }
+  .result-act-btn:hover:not(:disabled) { 
+    background: rgba(255, 255, 255, 0.08); 
+    color: #fff;
+    border-color: rgba(0, 212, 255, 0.25);
+  }
+  .result-act-btn:disabled { 
+    opacity: 0.4; 
+    cursor: not-allowed; 
+  }
+  .result-act-btn svg { 
+    width: 12px; 
+    height: 12px; 
+    color: #00D4FF;
+  }
+
+  /* ── HISTORY SCREEN ──────────────────────────────── */
+  .history-search-box {
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .history-search-box svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .history-search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #fff;
+    outline: none;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.25s ease;
+  }
+  .history-search-box input:focus {
+    border-color: #00D4FF;
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
+  }
+  .clear-all-btn {
+    background: none; 
+    border: none;
+    cursor: pointer; 
+    color: #EF4444;
+    font-size: 11.5px; 
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .clear-all-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+  }
+  .history-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 2px;
+    margin-top: 6px;
+  }
+  
+  /* History Card redesign */
+  .history-item {
+    position: relative;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+  }
+  .history-item:hover { 
+    background: rgba(0, 212, 255, 0.05); 
+    border-left: 3px solid #00D4FF;
+    border-color: rgba(0, 212, 255, 0.2) rgba(255, 255, 255, 0.06) rgba(255, 255, 255, 0.06) rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  }
+  .history-info { 
+    flex: 1; 
+    min-width: 0; 
+  }
+  .history-name {
+    font-size: 12px; 
+    font-weight: 600;
+    color: #fff;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-meta { 
+    font-size: 10px; 
+    color: rgba(255, 255, 255, 0.40); 
+    margin-top: 2px; 
+  }
+  .del-btn {
+    background: none; 
+    border: none;
+    cursor: pointer; 
+    color: rgba(255, 255, 255, 0.25);
+    padding: 6px; 
+    margin-left: 8px; 
+    flex-shrink: 0;
+    border-radius: 6px;
+    display: flex;
+    transition: all 0.2s ease;
+    opacity: 0; /* Hidden by default, reveals on hover */
+  }
+  .history-item:hover .del-btn {
+    opacity: 1;
+  }
+  .del-btn:hover { 
+    color: #EF4444; 
+    background: rgba(239, 68, 68, 0.1); 
+  }
+  .del-btn svg { 
+    width: 13px; 
+    height: 13px; 
+    stroke: currentColor;
+  }
+  .history-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 12px;
+  }
+
+  /* ── SETTINGS SCREEN ──────────────────────────────── */
+  .settings-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px;
+    margin: 12px 14px 0;
+  }
+  
+  .groq-input-container {
+    position: relative;
+    margin-top: 4px;
+  }
+  .groq-input-container input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #fff;
+    outline: none;
+    font-family: monospace;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+  }
+  .groq-input-container input:focus {
+    border-color: #00D4FF;
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.4);
+  }
+  .key-status-text {
+    font-size: 11px; 
+    margin-top: 6px; 
+    min-height: 16px;
+    font-weight: 500;
+  }
+  
+  /* Glowing ghost button for console key link */
+  .ghost-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: rgba(0, 212, 255, 0.04);
+    color: #00D4FF;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 11px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.05);
+    margin-top: 14px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .ghost-btn:hover {
+    background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+    border-color: #00D4FF;
+    color: #fff;
+  }
+
+  .privacy-note {
+    margin-top: 16px; 
+    font-size: 10px; 
+    color: rgba(255, 255, 255, 0.4); 
+    line-height: 1.4; 
+    background: rgba(255, 255, 255, 0.015); 
+    padding: 8px 10px; 
+    border-radius: 10px; 
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* ── TOAST NOTIFICATION ──────────────────────────── */
+  .toast {
+    position: fixed; 
+    bottom: 12px; 
+    left: 50%;
+    transform: translate(-50%, 150%);
+    background: rgba(13, 22, 40, 0.9); 
+    color: #fff;
+    font-size: 11px; 
+    font-weight: 500;
+    padding: 8px 16px;
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    border-radius: 20px;
+    opacity: 0; 
+    pointer-events: none;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+    white-space: nowrap;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 212, 255, 0.15);
+    backdrop-filter: blur(12px);
+  }
+  .toast.show { 
+    opacity: 1;
+    transform: translate(-50%, 0); 
+  }
+
+  /* ── REDUCED MOTION ACCESSIBILITY FALLBACK ───────── */
+  @media (prefers-reduced-motion: reduce) {
+    body {
+      animation: none !important;
+    }
+    .screen.active {
+      animation: none !important;
+    }
+    .spinner {
+      animation: none !important;
+      box-shadow: none !important;
+    }
+    .step-item {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .step-item.active .step-dot {
+      animation: none !important;
+    }
+    .summary-card::before {
+      animation: none !important;
+    }
+    .point-card {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .toast {
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== SCREEN: MAIN ==================== -->
+<div id="screen-main" class="screen active">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-name">SnapSummary</span>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn" id="btn-history" title="History">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-settings" title="Settings">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- URL Detection -->
+  <div class="card-container url-card" id="url-bar">
+    <svg class="yt-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M23.5 6.2s-.2-1.6-1-2.3c-.9-1-1.9-1-2.4-1C17 2.8 12 2.8 12 2.8s-5 0-8.1.1C3.4 3 2.4 3 1.5 4c-.8.7-1 2.3-1 2.3S.3 8 .3 9.8v1.7c0 1.8.2 3.6.2 3.6s.2 1.6 1 2.3c.9 1 2.1.9 2.6 1 1.9.2 8 .2 8 .2s5 0 8.1-.1c.5-.1 1.5-.1 2.4-1 .8-.7 1-2.3 1-2.3s.2-1.8.2-3.6V9.8c0-1.8-.3-3.6-.3-3.6zM9.7 15.5V8l6.6 3.8-6.6 3.7z"/>
+    </svg>
+    <span class="url-text" id="url-text">Detecting page...</span>
+    <svg class="url-check" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path d="M5 13l4 4L19 7"/>
+    </svg>
+  </div>
+
+  <!-- Language -->
+  <div class="card-container">
+    <p class="section-label">Language</p>
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-lang="en">English</button>
+      <button class="toggle-btn" data-lang="hi">Hindi</button>
+      <button class="toggle-btn" data-lang="hinglish">Hinglish</button>
+    </div>
+  </div>
+
+  <!-- Mode -->
+  <div class="card-container">
+    <p class="section-label">Mode</p>
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-mode="brief">
+        Brief
+        <div class="sub">~1 min</div>
+      </button>
+      <button class="toggle-btn" data-mode="detailed">
+        Detailed
+        <div class="sub">~3 min</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Add to Summary -->
+  <div style="padding: 12px 14px 4px;">
+    <button class="main-btn" id="btn-summarize">
+      <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Add to Summary
+    </button>
+  </div>
+
+  <hr class="divider">
+
+  <div class="secondary-btns">
+    <button class="sec-btn" id="btn-audio-overview">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 18v-6a9 9 0 0118 0v6"/>
+        <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+      </svg>
+      Audio overview
+    </button>
+    <button class="sec-btn" id="btn-video-overview">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+      </svg>
+      Video overview
+    </button>
+  </div>
+</div>
+
+
+<!-- ==================== SCREEN: LOADING ==================== -->
+<div id="screen-loading" class="screen">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo-name">SnapSummary</span>
+    </div>
+  </div>
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-title" id="loading-title">Processing video...</div>
+    <div class="loading-sub" id="loading-sub">This may take a minute</div>
+    <div class="loading-steps">
+      <div class="step-item" id="step-1">
+        <div class="step-dot"></div> Downloading audio
+      </div>
+      <div class="step-item" id="step-2">
+        <div class="step-dot"></div> Transcribing
+      </div>
+      <div class="step-item" id="step-3">
+        <div class="step-dot"></div> Generating summary
+      </div>
+      <div class="step-item" id="step-4">
+        <div class="step-dot"></div> Done
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== SCREEN: RESULT ==================== -->
+<div id="screen-result" class="screen">
+  <div class="header">
+    <button class="back-btn" id="btn-back-result">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      Back
+    </button>
+    <div class="header-icons">
+      <button class="icon-btn" id="btn-copy" title="Copy summary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="result-meta">
+    <div class="result-title" id="result-title">Video Title</div>
+    <div class="result-tags">
+      <span class="tag" id="result-lang-tag">English</span>
+      <span class="tag" id="result-mode-tag">Brief</span>
+    </div>
+  </div>
+
+  <div class="result-body" id="result-body">
+    <!-- Paragraph section -->
+    <p class="result-section-title">Summary</p>
+    <div id="result-paragraph" class="summary-card"></div>
+    
+    <!-- Key points -->
+    <p class="result-section-title">Key Points</p>
+    <div id="result-points"></div>
+    
+    <!-- Takeaway -->
+    <p class="result-section-title">Takeaway</p>
+    <div id="result-takeaway" class="takeaway-card"></div>
+  </div>
+
+  <!-- Audio Player -->
+  <div class="audio-container" id="audio-player-container" style="display:none;">
+    <p style="font-size:10.5px;color:rgba(255,255,255,0.4);margin:0 0 6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">🎧 Audio Overview</p>
+    <audio id="audio-player" controls>
+      Your browser does not support audio.
+    </audio>
+  </div>
+
+  <!-- Video loading -->
+  <div id="video-loading" style="display:none;padding:12px 14px;text-align:center;">
+    <p style="font-size:11.5px;color:rgba(0, 212, 255, 0.85);font-weight:500;">⏳ Generating video overview...</p>
+  </div>
+
+  <div class="result-actions">
+    <button class="result-act-btn" id="btn-dl-audio">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 18v-6a9 9 0 0118 0v6"/>
+        <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+      </svg>
+      Audio
+    </button>
+    <button class="result-act-btn" id="btn-dl-video">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+      </svg>
+      Video
+    </button>
+    <button class="result-act-btn" id="btn-dl-txt">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 16v-4m0 0V8m0 4H8m4 0h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+      </svg>
+      Save
+    </button>
+  </div>
+</div>
+
+
+<!-- ==================== SCREEN: HISTORY ==================== -->
+<div id="screen-history" class="screen">
+  <div class="header">
+    <button class="back-btn" id="btn-back-history">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>Back
+    </button>
+    <button class="clear-all-btn" id="btn-clear-all">Clear all</button>
+  </div>
+  
+  <div style="padding: 12px 14px 0;">
+    <div class="history-search-box">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" id="history-search" placeholder="Search topics..."/>
+    </div>
+  </div>
+  
+  <div style="padding: 4px 14px 0; display: flex; justify-content: space-between; align-items: center;">
+    <span id="history-count" style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:500;"></span>
+  </div>
+  
+  <div style="padding: 4px 14px 8px;">
+    <div id="history-list" class="history-list"></div>
+  </div>
+</div>
+
+
+<!-- ==================== SCREEN: SETTINGS ==================== -->
+<div id="screen-settings" class="screen">
+  <div class="header">
+    <button class="back-btn" id="btn-back-settings">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>Back
+    </button>
+    <span class="logo-name" style="margin-right: auto; margin-left: 10px;">Settings</span>
+  </div>
+  
+  <div class="settings-card">
+    <p class="section-label">Groq API Key</p>
+    <div class="groq-input-container">
+      <input type="password" id="groq-key-input" placeholder="gsk_••••••••••••••••"/>
+    </div>
+    
+    <div id="key-status" class="key-status-text"></div>
+    
+    <button class="main-btn" id="btn-save-key" style="margin-top: 12px;">
+      Save Key
+    </button>
+    
+    <a href="https://console.groq.com/keys" target="_blank" class="ghost-btn">
+      Get a free Groq API key →
+    </a>
+    
+    <div class="privacy-note">
+      🔒 <strong>Privacy Note:</strong> Your API key is stored locally in your browser's extension storage and is only sent directly to the Groq API server (via the backend proxy) to run transcribing and summary models. It is never stored or logged on the backend.
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
